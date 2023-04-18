@@ -13,11 +13,11 @@ class CatsRepository(
     suspend fun getCatsFromApi(): RequestResult<List<Cat>> {
         return catsGateway.getCats()
             .thenSuspending { catsResponse ->
-                val users = catsResponse.orEmpty()
+                val cats = catsResponse.orEmpty()
                     .distinctBy { cat -> cat.id }
                     .map { it.toCat() }
 
-                RequestResult.Success(users)
+                RequestResult.Success(cats)
             }
     }
 }
