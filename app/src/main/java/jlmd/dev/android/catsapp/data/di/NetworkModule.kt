@@ -6,6 +6,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import jlmd.dev.android.catsapp.data.service.gateway.CatsGateway
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -27,7 +28,11 @@ enum class OkHttpClients {
 }
 
 enum class Interceptors {
-    LOGGING
+    API_TOKENS, LOGGING
+}
+
+enum class ApiKeyProviders {
+    API_KEY
 }
 
 val networkModule = module {
@@ -42,6 +47,10 @@ val networkModule = module {
 
     //region interceptors
     single<Interceptor>(named(Interceptors.LOGGING.name)) { provideHttpLoggingInterceptor() }
+
+    single(named(Interceptors.API_TOKENS.name)) {
+        provideApiKeyInterceptor()
+    }
 
     // region Http Clients
     single(named(OkHttpClients.DEFAULT.name)) {
@@ -89,6 +98,26 @@ fun provideRetrofit(
     factories.forEach { builder.addConverterFactory(it) }
 
     return builder.build()
+}
+
+fun provideApiKeyInterceptor(): Interceptor {
+    return object : Interceptor {
+        override fun intercept(chain: Interceptor.Chain): Response {
+            return modifyChainRequest(chain)
+        }
+
+        private fun modifyChainRequest(chain: Interceptor.Chain): Response {
+            val originalRequest = chain.request()
+            val apiKey = "bda53789-d59e-46cd-9bc4-2936630fde39"
+
+            val newRequest = originalRequest.newBuilder()
+                .header("x-api-key", apiKey)
+                .method(originalRequest.method, originalRequest.body)
+                .build()
+
+            return chain.proceed(request = newRequest)
+        }
+    }
 }
 
 private fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {

@@ -45,7 +45,8 @@ class MainViewModel(
                 id = it.id,
                 breedName = it.breedName,
                 origin = it.origin,
-                intelligence = it.intelligence
+                intelligence = it.intelligence,
+                imageUrl = it.imageUrl
             )
         }
     }

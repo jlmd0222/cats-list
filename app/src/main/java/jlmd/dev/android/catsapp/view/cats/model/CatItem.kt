@@ -5,4 +5,5 @@ data class CatItem(
     val breedName: String,
     val origin: String,
     val intelligence: Int,
+    val imageUrl: String?
 )
